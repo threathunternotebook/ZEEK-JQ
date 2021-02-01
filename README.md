@@ -5,7 +5,7 @@ Print out source host and port, destination host and port
 <pre><code>cat conn.log | jq -j '.["id.orig_h"], ", ", .["id.orig_p"], ", ",.["id.resp_h"], ", ", .["id.resp_p"], "\n"</code></pre>
 
 Print out source host and port, destination host and port along with connection state.  Look for port 22, sort and unique
-<pre><code>zcat conn.* | jq -j '.["id.orig_h"], ", ", .["id.orig_p"], ", ",.["id.resp_h"], ", ", .["id.resp_p"], ", ", .["conn_state"], "\n"' | grep -P " 22, " | sort -u</code></pre>
+<pre><code>zcat conn.* | jq -j 'select(.["id.resp_p"] == 22 and .conn_state == "SF") | .["id.orig_h"], ", ", .["id.resp_h"], ", ", .["id.resp_p"], ", ", .["conn_state"], "\n"' | sort -u</code></pre>
 
 Print smb_share information
 <pre><code>cat smb_mapping.log | jq -j '.["id.orig_h"], "\t", .["id.resp_h"], "\t", .["path"], "\t", .["share_type"],"\n"' | grep -v null | sort -u</code></pre>
@@ -24,3 +24,9 @@ Print and sort all users who's accounts were locked out from Zeek kerberos log a
 
 Print log messages associated with a specific zeek uid from all archived logs
 <pre><code>ls -la *.gz | awk '{print $9}' | while read line; do zcat $line |jq 'select(.uid == "Cb0Tr91RJWdZQCia4")' ;done 2>/dev/null</code></pre>
+
+Iterate through all Zeek log directories.  Find kerberos failed login messages.  Write out source ip and kerberos clients with count # totals to a csv file
+<pre><code>ls -dl 2021-0* | awk '{print $9}' | while read line; do ls $line | while read file; do echo $line/$file | grep kerberos | while read line; do zcat $line |jq -j 'select(.error_msg == "KDC_ERR_PREAUTH_FAILED") | ",", .["id.orig_h"], ",", .client, "\n"' ;done; done; done | sort | uniq -c | sort -n -r >> /home/hunter/top_failed_logons.csv</code></pre>
+
+Iterate through all Zeek log directories.  Find Kerberos Locked Account messages.  Write out source ip and kerberos clients with count totals to a csv file.
+<pre><code>ls -dl 2021-0* | awk '{print $9}' | while read line; do ls $line | while read file; do echo $line/$file | grep kerberos | while read line; do zcat $line |jq -j 'select(.error_msg == "KDC_ERR_CLIENT_REVOKED") | ",", .["id.orig_h"], ",", .client, "\n"' ;done; done; done | sort | uniq -c | sort -n -r >> /home/hunter/top_locked_accounts.csv</code></pre>
