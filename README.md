@@ -1,4 +1,5 @@
 # ZEEK-JQ
+## The following commands are useful when working with ZEEK logs that are in JSON format.
 
 Print out source host and port, destination host and port
 <pre><code>cat conn.log | jq -j '.["id.orig_h"], ", ", .["id.orig_p"], ", ",.["id.resp_h"], ", ", .["id.resp_p"], "\n"</code></pre>
