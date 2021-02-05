@@ -30,3 +30,6 @@ Iterate through all Zeek log directories.  Find kerberos failed login messages. 
 
 Iterate through all Zeek log directories.  Find Kerberos Locked Account messages.  Write out source ip and kerberos clients with count totals to a csv file.
 <pre><code>ls -dl 2021-0* | awk '{print $9}' | while read line; do ls $line | while read file; do echo $line/$file | grep kerberos | while read line; do zcat $line |jq -j 'select(.error_msg == "KDC_ERR_CLIENT_REVOKED") | ",", .["id.orig_h"], ",", .client, "\n"' ;done; done; done | sort | uniq -c | sort -n -r >> /home/hunter/top_locked_accounts.csv</code></pre>
+
+Iterate through all Zeek log directories. Find conn logs. Print out all SSL connections that are less than 1 second in duration with a connection state of 'SF' and a responding port of 443. Write the count, requesting host, responding host, responding port and connection state in csv format to a file.
+<pre><code>ls -dl 2021-0* | awk '{print $9}' | while read line; do ls $line | while read file; do echo $line/$file | grep -P "conn\." | while read line; do zcat $line | jq -j 'select((.duration < 1) and .conn_state == "SF" and .["id.resp_p"] == 443) | ",",.["id.orig_h"], ",", .["id.resp_h"], ",", .["id.resp_p"], ",",.conn_state, "\n"' ;done; done; done | sort | uniq -c |sort -n -r > ~/ssl_short_duration.csv</code></pre>
