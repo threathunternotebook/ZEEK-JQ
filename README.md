@@ -50,7 +50,7 @@ Printing SSH Logs.
 <pre><code>ls -ld 2022-* | awk '{print $9}' | while read line; do zcat $line/ssh.* | jq -j 'select(.auth_success == true) | "\t", .["id.orig_h"], "\t", .["id.resp_h"], "\t", .["client"], "\t", .["server"], "\t", .["cipher_alg"],"\t", .["mac_alg"],"\t", .["kex_alg"],"\t", .["host_key_alg"],"\t", .["host_key"], "\t", .["hasshServer"],"\t", .["cshka"],"\t", .["hasshAlgorithms"], "\t", .["sshka"], "\t", .["hasshServerAlgorithms"], "\n"'; done > /home/venator/ssh_keys.tsv</code></pre>
 
 Convert Epoch to ISO date.
-<pre><code>cat conn.log | date --date=@`jq 'select(.uid=="CZx3YaRegDjCdyHq4") | .ts'`
+<pre><code>cat conn.log | date --date=@`jq 'select(.uid=="CZx3YaRegDjCdyHq4") | .ts'`</code></pre>
 <pre><code>cat conn.log | jq -j '.ts, "\n"' | while read line; do date --date=@$line ;done</code></pre>
 
 Create comma delimited output with ISO date.
