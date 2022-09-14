@@ -66,3 +66,6 @@ Look for SNMP policy violations.
 
 List tunnels. Avoid directories with no tunnel logs.
 <pre><code>ls -ld 2022-* | awk '{print $9}' | while read line; do if (ls $line/tunnel* 2>/dev/null | grep -v cannot); then zcat $line/tunnel* | jq -j '"\t", .["id.orig_h"], "\t", .["id.resp_h"], "\t", .["tunnel_type"],  "\n"' ; fi ;  done | grep -v -P "^2022" | sort | uniq -c | sort -nr</code></pre>
+
+The file below is a tab-delimited file extracted from Zeek logs containing ts(EPOCH), source ip, destination ip, destination port, and connection state. Print this out replacing the EPOCH date with human-readable timestamp.
+<pre><code>cat ConnState_SF_only.tsv | while read line; do echo $line ; date --date=@`echo $line | awk '{print $1}'` | tr "\n" " " ;done | awk '{print $1, $2, $3, $4, $5, $6, $8, $9, $10}'</code></pre>
